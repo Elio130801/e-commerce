@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 
 @Injectable()
@@ -25,14 +25,34 @@ export class ProductsService {
     return await this.productRepository.save(product);
   }
 
-  findAll() {
-    return this.productRepository.find();
+  async findAll(query?: string) {
+    if (query) {
+      return await this.productRepository.find({
+        where: [
+          { name: ILike(`%${query}%`) },
+          { description: ILike(`%${query}%`) }
+        ]
+      });
+    }
+    return await this.productRepository.find();
   }
 
-  async findOne(id: string) { 
-    const product = await this.productRepository.findOneBy({ id });
+  async findOne(term: string) { 
+    let product: Product | null;
+
+    // Usamos una expresión regular para saber si el texto (term) tiene forma de UUID
+    const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(term);
+
+    if (isUUID) {
+      // Si tiene forma de ID largo, buscamos por ID (Útil para el panel de Admin)
+      product = await this.productRepository.findOneBy({ id: term });
+    } else {
+      // Si son palabras, buscamos por la columna slug (Útil para la tienda web)
+      product = await this.productRepository.findOneBy({ slug: term });
+    }
+
     if (!product) {
-      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+      throw new NotFoundException(`Producto con identificador ${term} no encontrado`);
     }
     return product;
   }

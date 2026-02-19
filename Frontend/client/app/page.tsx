@@ -57,7 +57,7 @@ export default async function Home() {
                   ${product.price}
                 </span>
                 <Link 
-                  href={`/products/${product.id}`}
+                  href={`/products/${product.slug}`}
                   className="bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors"
                 >
                   Ver

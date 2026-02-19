@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 import useCart from "@/hooks/use-cart";
@@ -7,6 +8,17 @@ import { useState, useEffect } from "react";
 export default function Navbar() {
     const cart = useCart();
     const [isMounted, setIsMounted] = useState(false);
+
+    const router = useRouter();
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault(); // Evita que la página se recargue
+        if (searchTerm.trim()) {
+            // Redirige a la página de búsqueda con la palabra en la URL
+            router.push(`/search?q=${searchTerm}`);
+        }
+    };
 
     // Evitamos errores de hidratación esperando a que cargue el cliente
     useEffect(() => {
@@ -24,16 +36,18 @@ export default function Navbar() {
                     </Link>
 
                     {/* 2. BARRA DE BÚSQUEDA (Solo visual por ahora) */}
-                    <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-1/3">
+                    <form onSubmit={handleSearch} className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-1/3">
                         <input 
                             type="text"
                             placeholder="Buscar productos..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="bg-transparent border-none outline-none w-full text-sm placeholder-gray-500"
                         />
-                        <button>
-                        🔍 {/* Puedes cambiar esto por un icono SVG más tarde */}
+                        <button type="submit">
+                            🔍 
                         </button>
-                    </div>
+                    </form>
 
                     {/* 3. ACCIONES (Carrito y Admin) */}
                     <div className="flex items-center gap-6">

@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import useCart from "@/hooks/use-cart";
 import Link from "next/link";
 
 export default function CartPage() {
     const cart = useCart();
+    const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
+    const [customerName, setCustomerName] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
 
     // Evitar errores de hidratación (el carrito se guarda en el navegador)
     useEffect(() => {
@@ -23,13 +27,46 @@ export default function CartPage() {
         return total + Number(item.price);
     }, 0);
 
+const onCheckout = async () => {
+    // 👇 2. VALIDACIÓN SIMPLE
+    if (!customerName || !customerEmail) {
+        alert("Por favor, completa tu nombre y correo para realizar la compra.");
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:4000/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                // 👇 3. USAMOS LAS VARIABLES DEL USUARIO
+                customerName: customerName, 
+                customerEmail: customerEmail,
+                total: totalPrice,
+                items: cart.items,
+            }),
+        });
+
+        if (response.ok) {
+            alert("¡Compra realizada con éxito! 🎉");
+            cart.removeAll();
+            router.push("/");
+        } else {
+            alert("Hubo un error al procesar el pedido.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("No se pudo conectar con el servidor.");
+    }
+};
+
     return (
         <div className="bg-white">
             <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
                 <h1 className="text-3xl font-bold text-black mb-10">Tu Carrito de Compras</h1>
         
                 <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
-          
+
                 {/* LISTA DE PRODUCTOS (Izquierda - Ocupa 7 columnas) */}
                 <div className="lg:col-span-7">
                     {cart.items.length === 0 && (
@@ -94,9 +131,33 @@ export default function CartPage() {
                         </div>
                     </div>
 
+                    {cart.items.length > 0 && (
+                        <div className="mt-6 space-y-4 border-t border-gray-200 pt-4">
+                            <h3 className="text-sm font-medium text-gray-900">Tus Datos</h3>
+                            <div>
+                                <input
+                                    type="text"
+                                    placeholder="Nombre completo"
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-black"
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="email"
+                                    placeholder="Correo electrónico"
+                                    value={customerEmail}
+                                    onChange={(e) => setCustomerEmail(e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-black"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     <button
                         disabled={cart.items.length === 0}
-                        onClick={() => alert("¡Función de pago próximamente! 💳")}
+                        onClick={onCheckout}
                         className={`w-full mt-6 rounded-md border border-transparent px-4 py-3 text-base font-medium text-white shadow-sm ${
                             cart.items.length === 0
                                 ? "bg-gray-300 cursor-not-allowed"
