@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AdminNavbar from "@/components/AdminNavbar";
 
 // Función para pedir las órdenes al Backend
 async function getOrders() {
@@ -16,7 +17,9 @@ export default async function AdminOrdersPage() {
     const orders = await getOrders();
 
     return (
+        
         <div className="min-h-screen bg-gray-50 p-8">
+            <AdminNavbar />
             <div className="max-w-7xl mx-auto">
         
                 <div className="flex justify-between items-center mb-8">

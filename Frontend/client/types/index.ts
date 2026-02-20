@@ -8,4 +8,8 @@ export interface Product {
     images: string[];
     slug: string;
     isActive: boolean;
+    category?: {
+        id: string;
+        name: string;
+    };
 }

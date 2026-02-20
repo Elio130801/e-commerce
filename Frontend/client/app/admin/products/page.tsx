@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import AdminNavbar from "@/components/AdminNavbar";
 
 export default function AdminProductsPage() {
     const [products, setProducts] = useState<any[]>([]);
@@ -55,6 +56,7 @@ export default function AdminProductsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4">
+            <AdminNavbar />
             <div className="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
         
                 <div className="flex justify-between items-center mb-8">
