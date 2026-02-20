@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -13,6 +13,24 @@ export default function NewProductPage() {
     const [price, setPrice] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [stock, setStock] = useState("");
+    const [categories, setCategories] = useState<any[]>([]);
+    const [categoryId, setCategoryId] = useState("");
+
+useEffect(() => {
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch("http://localhost:4000/categories");
+            if (response.ok) {
+                const data = await response.json();
+                setCategories(data);
+            }
+        } catch (error) {
+            console.error("Error cargando categorías:", error);
+        }           
+    };
+
+    fetchCategories();
+}, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,11 +38,13 @@ export default function NewProductPage() {
         const generatedSlug = name.toLowerCase().trim().replace(/[\s\W-]+/g, '-');
 
         try {
+            const token = localStorage.getItem("admin_token");
             // Enviamos el nuevo producto al Backend
             const response = await fetch("http://localhost:4000/products", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                     // Nota: Si tu ruta POST tiene AuthGuard en el backend, 
                     // necesitaremos enviar el Token aquí más adelante.
                 },
@@ -36,6 +56,7 @@ export default function NewProductPage() {
                     slug: generatedSlug, // Usamos el slug generado automáticamente
                     images: [imageUrl], // Lo metemos en un array como pide el backend
                     isActive: true,
+                    categoryId: categoryId,
                 }),
             });
 
@@ -84,6 +105,23 @@ export default function NewProductPage() {
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-black h-24"
                             placeholder="Detalles del producto..."
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Categoría</label>
+                        <select
+                            required
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-black bg-white"
+                        >
+                            <option value="" disabled>Selecciona una categoría</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>

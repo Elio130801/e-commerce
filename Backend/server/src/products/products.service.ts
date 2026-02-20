@@ -58,18 +58,29 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    // 1. Preload: Busca el producto y reemplaza SOLO los datos que enviamos
-    const product = await this.productRepository.preload({
-      id: id,
-      ...updateProductDto,
-    });
+    // 1. Separamos el categoryId del resto de los datos (igual que en create)
+    const { categoryId, ...productData } = updateProductDto;
 
-    // 2. Si no existe el ID, lanzamos error
+    // 2. Preparamos el objeto con los datos a actualizar
+    const updateData: any = {
+      id: id,
+      ...productData,
+    };
+
+    // 3. Si el Frontend nos envió una categoría, la armamos como le gusta a TypeORM
+    if (categoryId) {
+      updateData.category = { id: categoryId };
+    }
+
+    // 4. Preload: Busca el producto y reemplaza SOLO los datos que enviamos
+    const product = await this.productRepository.preload(updateData);
+
+    // 5. Si no existe el ID, lanzamos error
     if (!product) {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
 
-    // 3. Guardamos los cambios
+    // 6. Guardamos los cambios
     return await this.productRepository.save(product);
   }
 
