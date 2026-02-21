@@ -19,14 +19,10 @@ export default async function AdminOrdersPage() {
     return (
         
         <div className="min-h-screen bg-gray-50 p-8">
-            <AdminNavbar />
             <div className="max-w-7xl mx-auto">
         
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Panel de Ventas</h1>
-                    <Link href="/" className="text-blue-600 hover:underline">
-                        Volver a la tienda
-                    </Link>
                 </div>
 
                 {/* TABLA DE ÓRDENES */}

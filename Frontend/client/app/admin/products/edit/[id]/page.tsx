@@ -85,7 +85,6 @@ export default function EditProductPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4">
-            <AdminNavbar />
             <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold text-gray-900">Editar Producto</h1>

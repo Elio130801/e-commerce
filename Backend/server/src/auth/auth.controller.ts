@@ -17,7 +17,8 @@ export class AuthController {
         return this.authService.register(
             registerDto.name, 
             registerDto.email, 
-            registerDto.password
+            registerDto.password,
+            registerDto.roles
         );
     }
 }

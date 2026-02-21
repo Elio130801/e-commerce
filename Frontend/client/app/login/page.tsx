@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
-    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -27,12 +25,21 @@ export default function LoginPage() {
 
             if (response.ok) {
                 const data = await response.json();
+                const userRoles = data.user.roles || []; // Extraemos los roles del usuario
         
-                // Guardamos la llave del cliente en el navegador
-                localStorage.setItem("token", data.access_token);
-        
-                alert("¡Bienvenido de vuelta a Lumière! ✨");
-                router.push("/"); // Lo mandamos a la portada de la tienda para que compre
+                // 👑 LÓGICA DE RUTEO POR ROL (El cerebro de la operación)
+                if (userRoles.includes("admin")) {
+                    // Si es el dueño, le damos la llave VIP y lo mandamos al panel
+                    localStorage.setItem("admin_token", data.access_token);
+                    alert("¡Bienvenido al Panel de Control, Jefe! 👑");
+                    window.location.href = "/admin/products"; 
+                } else {
+                    // Si es un cliente, le damos la llave normal y lo mandamos a comprar
+                    localStorage.setItem("token", data.access_token);
+                    alert("¡Bienvenido de vuelta a Lumière! ✨");
+                    window.location.href = "/"; 
+                }
+
             } else {
                 setError("Correo o contraseña incorrectos. Inténtalo de nuevo.");
             }
@@ -67,7 +74,6 @@ export default function LoginPage() {
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
                     <form className="space-y-6" onSubmit={handleLogin}>
             
-                        {/* Campo: Correo */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Correo Electrónico
@@ -84,7 +90,6 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Campo: Contraseña */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Contraseña
@@ -100,21 +105,19 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Mensaje de Error */}
                         {error && (
                             <div className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-md">
                                 {error}
                             </div>
                         )}
 
-                        {/* Botón Submit */}
                         <div>
                             <button
                                 type="submit"
                                 disabled={isLoading}
                                 className="flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors disabled:opacity-50"
                             >
-                                {isLoading ? "Iniciando sesión..." : "Entrar a la tienda"}
+                                {isLoading ? "Iniciando sesión..." : "Entrar"}
                             </button>
                         </div>
             

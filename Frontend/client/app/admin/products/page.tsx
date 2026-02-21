@@ -56,15 +56,11 @@ export default function AdminProductsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4">
-            <AdminNavbar />
             <div className="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
         
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
                     <div className="flex gap-4">
-                        <Link href="/admin/orders" className="text-sm text-gray-600 hover:text-black py-2">
-                            Ver Ventas
-                        </Link>
                         <Link 
                             href="/admin/products/new" 
                             className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
