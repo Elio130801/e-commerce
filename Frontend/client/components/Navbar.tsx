@@ -5,7 +5,6 @@ import useCart from "@/hooks/use-cart";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
-    // 1. TODOS LOS HOOKS ARRIBA
     const cart = useCart();
     const router = useRouter();
     const pathname = usePathname();
@@ -87,9 +86,15 @@ export default function Navbar() {
                                         </Link>
                                     </div>
                                 ) : isClientLogged ? (
-                                    <button onClick={handleLogout} className="text-sm font-medium text-gray-600 hover:text-black transition-colors">
-                                        Cerrar Sesión
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <Link href="/profile" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">
+                                            Mi Perfil
+                                        </Link>
+                                        <span className="text-gray-300">|</span>
+                                        <button onClick={handleLogout} className="text-sm font-medium text-gray-600 hover:text-black transition-colors">
+                                            Cerrar Sesión
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                                         <Link href="/login" className="hover:text-black transition-colors">

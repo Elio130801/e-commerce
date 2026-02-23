@@ -28,18 +28,29 @@ export default function CartPage() {
     }, 0);
 
 const onCheckout = async () => {
-    // 👇 2. VALIDACIÓN SIMPLE
     if (!customerName || !customerEmail) {
         alert("Por favor, completa tu nombre y correo para realizar la compra.");
         return;
     }
 
+    // Buscamos si el usuario inició sesión
+    const token = localStorage.getItem("token");
+
+    // Preparamos los headers de seguridad
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+    };
+
+    // Si hay un token, lo adjuntamos como un pase VIP
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
         const response = await fetch('http://localhost:4000/orders', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers, // 👈 Pasamos los headers inteligentes
             body: JSON.stringify({
-                // 👇 3. USAMOS LAS VARIABLES DEL USUARIO
                 customerName: customerName, 
                 customerEmail: customerEmail,
                 total: totalPrice,

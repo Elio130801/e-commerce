@@ -23,6 +23,13 @@ export class OrdersService {
     });
   }
 
+  async findMyOrders(userId: string) {
+    return await this.orderRepository.find({
+      where: { userId: userId },
+      order: { createdAt: 'DESC' } // Las compras más nuevas primero
+    });
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} order`;
   }

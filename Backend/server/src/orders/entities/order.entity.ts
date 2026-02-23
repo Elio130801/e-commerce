@@ -4,6 +4,9 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn} from 'typeorm
 export class Order {
     @PrimaryGeneratedColumn('uuid')
     id: string;
+    
+    @Column({ nullable: true })
+    userId: string;
 
     @Column()
     customerName: string;
