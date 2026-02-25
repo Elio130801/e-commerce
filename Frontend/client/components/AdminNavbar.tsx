@@ -56,7 +56,7 @@ export default function AdminNavbar() {
                         {/* Botón de cerrar sesión minimalista e idéntico al estilo del cliente */}
                         <button 
                             onClick={handleLogout}
-                            className="text-sm font-medium text-red-600 hover:underline transition-colors"
+                            className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
                         >
                             Cerrar Sesión
                         </button>

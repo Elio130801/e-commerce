@@ -11,7 +11,6 @@ export class AuthService {
     ) {}
 
     async login(email: string, pass: string) {
-        // 1. Limpiamos el correo de espacios y mayúsculas
         const cleanEmail = email.toLowerCase().trim();
         
         console.log("--- INTENTO DE LOGIN ---");
@@ -25,7 +24,6 @@ export class AuthService {
             throw new UnauthorizedException('Credenciales inválidas');
         }
 
-        // Vemos cómo se guardó la contraseña realmente
         console.log("Hash en BD:", user.password);
         
         const isMatch = await bcrypt.compare(pass, user.password);
@@ -48,7 +46,8 @@ export class AuthService {
         };
     }
 
-    async register(name: string, email: string, pass: string, roles?: string[]) {
+    // 👇 Cambiamos 'name' por 'fullName' en los parámetros
+    async register(fullName: string, email: string, pass: string, roles?: string | string[]) {
         const cleanEmail = email.toLowerCase().trim();
         
         const userExists = await this.usersService.findByEmail(cleanEmail); 
@@ -59,10 +58,9 @@ export class AuthService {
         const hashedPassword = await bcrypt.hash(pass, 10);
         
         const newUser = await this.usersService.create({
-            fullName: name,
+            fullName: fullName, // 👈 Todo alineado
             email: cleanEmail,
-            password: pass,
-            // 👇 MAGIA: Si Postman manda roles, los usa. Si viene de la web (vacío), usa 'user'.
+            password: hashedPassword, // 🚨 CORREGIDO: Ahora sí guardamos la contraseña encriptada
             roles: roles || ['user'] 
         } as any);
 
