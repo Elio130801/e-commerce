@@ -39,23 +39,31 @@ export default function CartPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:4000/orders', {
+            // 👇 CAMBIO 1: Apuntamos al nuevo módulo de pagos
+            const response = await fetch('http://localhost:4000/payments/create', {
                 method: 'POST',
                 headers: headers, 
                 body: JSON.stringify({
                     customerName: customerName, 
                     customerEmail: customerEmail,
                     total: totalPrice,
-                    items: cart.items,
+                    items: cart.items, // Enviamos los items para que MP sepa qué cobrar
                 }),
             });
 
             if (response.ok) {
-                alert("¡Compra realizada con éxito! 🎉");
-                cart.removeAll();
-                router.push("/");
+                const data = await response.json();
+                
+                // 👇 CAMBIO 2: Redirigimos a la URL de Mercado Pago
+                if (data.url) {
+                    // Opcional: Podrías vaciar el carrito aquí, pero es mejor hacerlo 
+                    // después de que el usuario pague y vuelva a tu tienda (en la página de success).
+                    window.location.href = data.url; 
+                } else {
+                    alert("No se pudo obtener el link de pago.");
+                }
             } else {
-                alert("Hubo un error al procesar el pedido.");
+                alert("Hubo un error al conectar con la pasarela de pago.");
             }
         } catch (error) {
             console.error("Error:", error);

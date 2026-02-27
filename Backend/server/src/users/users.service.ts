@@ -7,29 +7,33 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  
-  // 1. INYECCIÓN DE DEPENDENCIAS
-  // Aquí le pedimos a NestJS que nos de acceso a la tabla 'User'
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // 2. MÉTODO PARA CREAR USUARIO
   async create(createUserDto: CreateUserDto) {
-    // A. Creamos una instancia del usuario con los datos recibidos
     const user = this.userRepository.create(createUserDto);
-
-    // B. Lo guardamos en la base de datos
-    // (El 'await' espera a que la base de datos responda)
     return await this.userRepository.save(user);
   }
 
   async findByEmail(email: string) {
     return this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password', 'roles'], // Forzamos traer el password para compararlo
+      select: ['id', 'email', 'password', 'roles'], 
     });
+  }
+
+  // 👇 NUEVO: Busca a un usuario usando el token temporal
+  async findByResetToken(token: string) {
+    return this.userRepository.findOne({
+      where: { resetPasswordToken: token }
+    });
+  }
+
+  // 👇 NUEVO: Guarda a un usuario que ya existe (actualiza sus datos)
+  async save(user: User) {
+    return this.userRepository.save(user);
   }
 
   findAll() {

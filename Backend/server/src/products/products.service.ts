@@ -31,10 +31,13 @@ export class ProductsService {
         where: [
           { name: ILike(`%${query}%`) },
           { description: ILike(`%${query}%`) }
-        ]
+        ],
+        relations: ['category']
       });
     }
     return await this.productRepository.find();
+
+      relations: ['category']
   }
 
   async findOne(term: string) { 
@@ -44,11 +47,15 @@ export class ProductsService {
     const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(term);
 
     if (isUUID) {
-      // Si tiene forma de ID largo, buscamos por ID (Útil para el panel de Admin)
-      product = await this.productRepository.findOneBy({ id: term });
+      product = await this.productRepository.findOne({
+      where: { id: term},
+      relations: ['category']
+      });
     } else {
-      // Si son palabras, buscamos por la columna slug (Útil para la tienda web)
-      product = await this.productRepository.findOneBy({ slug: term });
+      product = await this.productRepository.findOne({
+        where: { slug: term },
+        relations: ['category']
+      });
     }
 
     if (!product) {

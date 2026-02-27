@@ -99,7 +99,7 @@ export default function LoginPage() {
                                     Contraseña
                                 </label>
                                 <div className="text-sm">
-                                    <a href="#" className="font-medium text-gray-500 hover:text-black hover:underline transition-colors">
+                                    <a href="/forgot-password" className="font-medium text-gray-500 hover:text-black hover:underline transition-colors">
                                         ¿Olvidaste tu contraseña?
                                     </a>
                                 </div>

@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto'; // 👈 Importamos crypto para generar el token
 
 @Injectable()
 export class AuthService {
@@ -12,41 +13,21 @@ export class AuthService {
 
     async login(email: string, pass: string) {
         const cleanEmail = email.toLowerCase().trim();
-        
-        console.log("--- INTENTO DE LOGIN ---");
-        console.log("Email buscando:", cleanEmail);
-
         const user = await this.usersService.findByEmail(cleanEmail); 
-        console.log("¿Usuario encontrado?:", user ? "SÍ" : "NO");
 
-        if (!user) {
-            console.log("Fallo -> El correo no existe en la BD.");
-            throw new UnauthorizedException('Credenciales inválidas');
-        }
-
-        console.log("Hash en BD:", user.password);
+        if (!user) throw new UnauthorizedException('Credenciales inválidas');
         
         const isMatch = await bcrypt.compare(pass, user.password);
-        console.log("¿Las contraseñas coinciden?:", isMatch ? "SÍ" : "NO");
-        
-        if (!isMatch) {
-            console.log("Fallo -> La contraseña es incorrecta.");
-            throw new UnauthorizedException('Credenciales inválidas');
-        }
+        if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
 
-        console.log("¡ÉXITO! -> Generando token...");
         const payload = { sub: user.id, email: user.email, roles: user.roles };
         
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: { 
-                email: user.email,
-                roles: user.roles
-            }
+            user: { email: user.email, roles: user.roles }
         };
     }
 
-    // 👇 Cambiamos 'name' por 'fullName' en los parámetros
     async register(fullName: string, email: string, pass: string, roles?: string | string[]) {
         const cleanEmail = email.toLowerCase().trim();
         
@@ -58,19 +39,52 @@ export class AuthService {
         const hashedPassword = await bcrypt.hash(pass, 10);
         
         const newUser = await this.usersService.create({
-            fullName: fullName, // 👈 Todo alineado
+            fullName: fullName,
             email: cleanEmail,
-            password: hashedPassword, // 🚨 CORREGIDO: Ahora sí guardamos la contraseña encriptada
+            password: hashedPassword,
             roles: roles || ['user'] 
         } as any);
 
         return { 
             message: 'Usuario registrado exitosamente',
-            user: {
-                id: newUser.id,
-                email: newUser.email,
-                roles: newUser.roles
-            }
+            user: { id: newUser.id, email: newUser.email, roles: newUser.roles }
         };
+    }
+
+    // 👇 NUEVO: Generar Token de Recuperación
+    async forgotPassword(email: string) {
+        const cleanEmail = email.toLowerCase().trim();
+        const user = await this.usersService.findByEmail(cleanEmail);
+
+        if (!user) {
+            // Por seguridad, no decimos si el correo existe o no a los atacantes
+            return { message: 'Si el correo existe, se enviaron las instrucciones.' };
+        }
+
+        // Generamos un token seguro de 32 caracteres
+        const token = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = token;
+        await this.usersService.save(user);
+
+        // En producción enviaríamos un correo. Por ahora lo devolvemos en la respuesta:
+        return {
+            message: 'Si el correo existe, se enviaron las instrucciones.',
+            simulateEmailLink: `http://localhost:3000/reset-password?token=${token}`
+        };
+    }
+
+    // 👇 NUEVO: Actualizar la contraseña
+    async resetPassword(token: string, newPass: string) {
+        const user = await this.usersService.findByResetToken(token);
+
+        if (!user) {
+            throw new BadRequestException('El enlace es inválido o ya expiró.');
+        }
+
+        user.password = await bcrypt.hash(newPass, 10);
+        user.resetPasswordToken = null; // Inhabilitamos el token para que no se use dos veces
+        
+        await this.usersService.save(user);
+        return { message: '¡Contraseña actualizada con éxito!' };
     }
 }

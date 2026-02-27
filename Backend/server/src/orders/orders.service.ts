@@ -12,8 +12,8 @@ export class OrdersService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
-    const newOrder = this.orderRepository.create(createOrderDto);
+  async create(createOrderData: any): Promise<Order> {
+    const newOrder = this.orderRepository.create(createOrderData as Partial<Order>);
     return await this.orderRepository.save(newOrder);
   }
 
@@ -26,19 +26,25 @@ export class OrdersService {
   async findMyOrders(userId: string) {
     return await this.orderRepository.find({
       where: { userId: userId },
-      order: { createdAt: 'DESC' } // Las compras más nuevas primero
+      order: { createdAt: 'DESC' }
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  findOne(id: string) {
+    return this.orderRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  // 👇 Esta es la función mágica que usará nuestro Webhook
+  async updateStatus(id: string, status: string) {
+    const order = await this.orderRepository.findOne({ where: { id } });
+    if (order) {
+      order.status = status;
+      return await this.orderRepository.save(order);
+    }
+    return null;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  remove(id: string) {
+    return this.orderRepository.delete(id);
   }
 }
