@@ -46,6 +46,13 @@ export default function AdminNavbar() {
 
                     {/* 2. ACCIONES */}
                     <div className="flex items-center gap-5">
+                        {/* 👇 NUEVO: Botón de Mi Perfil (agregado al lado de Ver tienda) */}
+                        <Link href="/admin/profile" className={`text-sm font-medium text-gray-500 hover:text-black transition-colors hidden sm:block ${isActive("/admin/profile")}`}>
+                            Mi Perfil
+                        </Link>
+                        
+                        <span className="text-gray-300 hidden sm:block">|</span>
+
                         {/* Botón para volver rápido a ver cómo quedó la tienda */}
                         <Link href="/" className="text-sm font-medium text-gray-500 hover:text-black transition-colors hidden sm:block">
                             Ver tienda

@@ -20,11 +20,22 @@ export class AuthService {
         const isMatch = await bcrypt.compare(pass, user.password);
         if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
 
-        const payload = { sub: user.id, email: user.email, roles: user.roles };
+        // 👇 AÑADIMOS EL NOMBRE AL PAYLOAD DEL TOKEN
+        const payload = { 
+            sub: user.id, 
+            email: user.email, 
+            roles: user.roles,
+            fullName: user.fullName // 👈 ¡La pieza mágica!
+        };
         
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: { email: user.email, roles: user.roles }
+            // También lo sumamos aquí por si el frontend lo necesita directo en la respuesta
+            user: { 
+                email: user.email, 
+                roles: user.roles,
+                fullName: user.fullName
+            }
         };
     }
 

@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,7 +21,7 @@ export class UsersService {
   async findByEmail(email: string) {
     return this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password', 'roles'], 
+      select: ['id', 'email', 'password', 'roles', 'fullName'], 
     });
   }
 
@@ -40,12 +41,27 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    return this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'email', 'fullName', 'roles'] 
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateData: Record<string, any>) {
+    // Si desde el frontend nos envían una contraseña nueva, la encriptamos
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    // Actualizamos el usuario en la base de datos
+    await this.userRepository.update(id, updateData);
+
+    // Devolvemos el usuario actualizado para confirmar
+    return this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'email', 'fullName', 'roles'] 
+    });
   }
 
   remove(id: number) {
