@@ -2,6 +2,8 @@ import { Product } from "@/types";
 import Link from "next/link";
 import { notFound } from "next/navigation"; 
 import AddToCartButton from "@/components/ui/add-to-cart-button";
+import AddToWishlistButton from "@/components/ui/add-to-wishlist-button";
+import ProductReviews from "@/components/ProductReviews";
 // Función para pedir datos
 async function getProduct(id: string) {
     const res = await fetch(`http://localhost:4000/products/${id}`, {
@@ -83,13 +85,17 @@ export default async function ProductPage({ params }: Props) {
                     </div>
 
                     <div className="mt-10">
-                        <div className="mt-10">
+                        {/* 👇 Cambiamos esto para que estén juntos */}
+                        <div className="flex items-center gap-4">
                             <AddToCartButton data={product} />
+                            <AddToWishlistButton data={product} />
                         </div>
                     </div>
                 </div>
-
             </div>
+            
+            <ProductReviews productId={product.id} />
+
         </div>
     </div>
     );
