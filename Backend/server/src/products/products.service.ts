@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+// 👇 Importamos nuevos operadores de TypeORM para filtrar precios
+import { ILike, Repository, Between, MoreThanOrEqual, LessThanOrEqual, FindOptionsWhere } from 'typeorm';
 import { Product } from './entities/product.entity';
 
 @Injectable()
@@ -13,43 +14,62 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    // TypeORM es inteligente: si le pasas { category: { id: "..." } } él hace la relación.
-    // Pero como recibimos 'categoryId', hacemos un pequeño truco de mapeo:
     const { categoryId, ...productData } = createProductDto;
-    
     const product = this.productRepository.create({
       ...productData,
-      category: { id: categoryId }, // Vinculamos por ID
+      category: { id: categoryId }, 
     });
-    
     return await this.productRepository.save(product);
   }
 
-  async findAll(query?: string) {
-    if (query) {
-      return await this.productRepository.find({
-        where: [
-          { name: ILike(`%${query}%`) },
-          { description: ILike(`%${query}%`) }
-        ],
-        relations: ['category']
-      });
-    }
-    return await this.productRepository.find();
+  // 👇 Lógica dinámica para construir los filtros
+  async findAll(q?: string, minPrice?: number, maxPrice?: number, categoryId?: string) {
+    let whereOptions: FindOptionsWhere<Product> | FindOptionsWhere<Product>[] = {};
 
-      relations: ['category']
+    // Si hay búsqueda por texto, aplicamos el OR para nombre y descripción
+    if (q) {
+      whereOptions = [
+        { name: ILike(`%${q}%`) },
+        { description: ILike(`%${q}%`) }
+      ];
+    } else {
+      whereOptions = {};
+    }
+
+    // Función que inyecta el rango de precio y categoría en las condiciones
+    const applyFilters = (condition: FindOptionsWhere<Product>) => {
+      if (categoryId) condition.category = { id: categoryId };
+      
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        condition.price = Between(minPrice, maxPrice);
+      } else if (minPrice !== undefined) {
+        condition.price = MoreThanOrEqual(minPrice);
+      } else if (maxPrice !== undefined) {
+        condition.price = LessThanOrEqual(maxPrice);
+      }
+      return condition;
+    };
+
+    if (Array.isArray(whereOptions)) {
+      whereOptions = whereOptions.map(cond => applyFilters(cond));
+    } else {
+      whereOptions = applyFilters(whereOptions);
+    }
+
+    return await this.productRepository.find({
+      where: whereOptions,
+      relations: ['category'] 
+    });
   }
 
   async findOne(term: string) { 
     let product: Product | null;
-
-    // Usamos una expresión regular para saber si el texto (term) tiene forma de UUID
     const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(term);
 
     if (isUUID) {
       product = await this.productRepository.findOne({
-      where: { id: term},
-      relations: ['category']
+        where: { id: term},
+        relations: ['category']
       });
     } else {
       product = await this.productRepository.findOne({
@@ -65,34 +85,21 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    // 1. Separamos el categoryId del resto de los datos (igual que en create)
     const { categoryId, ...productData } = updateProductDto;
+    const updateData: any = { id: id, ...productData };
 
-    // 2. Preparamos el objeto con los datos a actualizar
-    const updateData: any = {
-      id: id,
-      ...productData,
-    };
-
-    // 3. Si el Frontend nos envió una categoría, la armamos como le gusta a TypeORM
     if (categoryId) {
       updateData.category = { id: categoryId };
     }
 
-    // 4. Preload: Busca el producto y reemplaza SOLO los datos que enviamos
     const product = await this.productRepository.preload(updateData);
+    if (!product) throw new NotFoundException(`Producto con ID ${id} no encontrado`);
 
-    // 5. Si no existe el ID, lanzamos error
-    if (!product) {
-      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
-    }
-
-    // 6. Guardamos los cambios
     return await this.productRepository.save(product);
   }
 
   async remove(id: string) {
-    const product = await this.findOne(id); // Reutilizamos findOne para verificar que existe
+    const product = await this.findOne(id); 
     return await this.productRepository.remove(product);
   }
 }

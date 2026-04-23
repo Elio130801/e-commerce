@@ -17,9 +17,18 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
+  // 👇 Modificamos el Get para recibir múltiples parámetros de filtrado
   @Get()
-  findAll(@Query('q') q?: string) {
-    return this.productsService.findAll(q);
+  findAll(
+    @Query('q') q?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('category') category?: string,
+  ) {
+    // Convertimos los precios a números antes de enviarlos al servicio
+    const min = minPrice ? Number(minPrice) : undefined;
+    const max = maxPrice ? Number(maxPrice) : undefined;
+    return this.productsService.findAll(q, min, max, category);
   }
 
   @Get(':id')

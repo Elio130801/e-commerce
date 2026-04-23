@@ -10,7 +10,7 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
     const [imageUrl, setImageUrl] = useState("");
     const [categoryId, setCategoryId] = useState("");
 
-    if (!isOpen) return null; // Si no está abierto, no renderiza nada
+    if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +30,6 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                     price: Number(price), 
                     stock: Number(stock),
                     slug: generatedSlug, 
-                    // Si hay URL de imagen, la enviamos, sino enviamos un array vacío
                     images: imageUrl ? [imageUrl] : [], 
                     categoryId, 
                     isActive: true,
@@ -39,10 +38,9 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
 
             if (response.ok) {
                 alert("¡Producto creado con éxito! 🚀");
-                // Limpiamos el formulario
                 setName(""); setDescription(""); setPrice(""); setStock(""); setImageUrl(""); setCategoryId("");
-                onSuccess(); // Avisamos a la tabla que recargue
-                onClose();   // Cerramos el modal
+                onSuccess(); 
+                onClose();   
             } else {
                 alert("Hubo un error al crear el producto.");
             }
@@ -62,7 +60,7 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                 <div className="p-6 overflow-y-auto">
                     <form id="createForm" onSubmit={handleSubmit} className="space-y-4">
                         
-                        {/* NOMBRE: Solo letras (con acentos/ñ), números y espacios */}
+                        {/* NOMBRE: Liberado de restricciones */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Nombre <span className="text-red-500">*</span>
@@ -71,15 +69,13 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                                 type="text" 
                                 required 
                                 value={name} 
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(val)) setName(val);
-                                }} 
+                                // 👇 Cambio aquí: Actualiza el estado directamente sin bloqueos
+                                onChange={(e) => setName(e.target.value)} 
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-black" 
                             />
                         </div>
 
-                        {/* DESCRIPCIÓN: Solo letras (con acentos/ñ), números y espacios */}
+                        {/* DESCRIPCIÓN: Liberado de restricciones */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Descripción <span className="text-red-500">*</span>
@@ -87,16 +83,14 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                             <textarea 
                                 required 
                                 value={description} 
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(val)) setDescription(val);
-                                }} 
+                                // 👇 Cambio aquí: Actualiza el estado directamente sin bloqueos
+                                onChange={(e) => setDescription(e.target.value)} 
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-black h-20" 
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            {/* PRECIO: Solo números y un punto decimal */}
+                            {/* PRECIO: Mantenemos la regla para que solo sean números y un punto */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
                                     Precio ($) <span className="text-red-500">*</span>
@@ -113,7 +107,7 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                                 />
                             </div>
 
-                            {/* STOCK: Solo números (enteros) */}
+                            {/* STOCK: Mantenemos la regla para que solo sean números enteros */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
                                     Stock <span className="text-red-500">*</span>
@@ -149,7 +143,7 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess, categor
                             </select>
                         </div>
 
-                        {/* URL DE IMAGEN: Le quitamos el "required" */}
+                        {/* URL DE IMAGEN */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 URL de la Imagen <span className="text-gray-400 font-normal">(Opcional)</span>
