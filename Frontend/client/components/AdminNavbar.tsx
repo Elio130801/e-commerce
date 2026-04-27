@@ -32,7 +32,6 @@ export default function AdminNavbar() {
                         </Link>
 
                         <div className="hidden md:flex items-center space-x-6 mt-1">
-                            {/* Nuevo enlace al Dashboard */}
                             <Link href="/admin" className={`text-sm py-5 transition-colors ${isActive("/admin")}`}>
                                 📈 Tablero
                             </Link>
@@ -41,6 +40,10 @@ export default function AdminNavbar() {
                             </Link>
                             <Link href="/admin/products" className={`text-sm py-5 transition-colors ${isActive("/admin/products")}`}>
                                 📦 Productos
+                            </Link>
+                            {/* 👇 NUEVO ENLACE PARA CUPONES */}
+                            <Link href="/admin/coupons" className={`text-sm py-5 transition-colors ${isActive("/admin/coupons")}`}>
+                                🎟️ Cupones
                             </Link>
                         </div>
                     </div>
