@@ -12,11 +12,9 @@ export default function AdminNavbar() {
         window.location.href = "/login";
     };
 
-    // Actualizamos la función para que el enlace activo sea minimalista (negrita y negro) 
-    // y el inactivo sea gris sutil.
     const isActive = (path: string) => 
         pathname === path 
-            ? "text-black font-bold" 
+            ? "text-black font-bold border-b-2 border-black" 
             : "text-gray-500 hover:text-black";
 
     return (
@@ -24,43 +22,42 @@ export default function AdminNavbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
 
-                    {/* 1. LOGO Y NAVEGACIÓN */}
                     <div className="flex items-center gap-8">
-                        {/* Logo idéntico al del cliente pero con la etiqueta ADMIN */}
-                        <Link href="/admin/products" className="flex items-center gap-2">
+                        {/* El logo ahora redirige al Dashboard principal */}
+                        <Link href="/admin" className="flex items-center gap-2">
                             <p className="font-serif font-bold text-2xl tracking-tight uppercase text-black">
                                 Lumière
                             </p>
+                            <span className="bg-black text-white text-[10px] px-2 py-0.5 rounded font-sans font-bold">ADMIN</span>
                         </Link>
 
-                        {/* Enlaces de navegación */}
                         <div className="hidden md:flex items-center space-x-6 mt-1">
-                            <Link href="/admin/orders" className={`text-sm transition-colors ${isActive("/admin/orders")}`}>
-                                📊 Ventas
+                            {/* Nuevo enlace al Dashboard */}
+                            <Link href="/admin" className={`text-sm py-5 transition-colors ${isActive("/admin")}`}>
+                                📈 Tablero
                             </Link>
-                            <Link href="/admin/products" className={`text-sm transition-colors ${isActive("/admin/products")}`}>
+                            <Link href="/admin/orders" className={`text-sm py-5 transition-colors ${isActive("/admin/orders")}`}>
+                                💰 Ventas
+                            </Link>
+                            <Link href="/admin/products" className={`text-sm py-5 transition-colors ${isActive("/admin/products")}`}>
                                 📦 Productos
                             </Link>
                         </div>
                     </div>
 
-                    {/* 2. ACCIONES */}
                     <div className="flex items-center gap-5">
-                        {/* 👇 NUEVO: Botón de Mi Perfil (agregado al lado de Ver tienda) */}
                         <Link href="/admin/profile" className={`text-sm font-medium text-gray-500 hover:text-black transition-colors hidden sm:block ${isActive("/admin/profile")}`}>
                             Mi Perfil
                         </Link>
                         
                         <span className="text-gray-300 hidden sm:block">|</span>
 
-                        {/* Botón para volver rápido a ver cómo quedó la tienda */}
                         <Link href="/" className="text-sm font-medium text-gray-500 hover:text-black transition-colors hidden sm:block">
                             Ver tienda
                         </Link>
                         
                         <span className="text-gray-300 hidden sm:block">|</span>
 
-                        {/* Botón de cerrar sesión minimalista e idéntico al estilo del cliente */}
                         <button onClick={handleLogout} className="text-red-600 hover:text-red-800 font-medium transition-colors text-sm">
                             Cerrar Sesión
                         </button>
