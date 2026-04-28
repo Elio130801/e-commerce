@@ -2,31 +2,39 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Product } from '@/types'; 
 
-// 1. Creamos un nuevo tipo que hereda de Product pero le suma "quantity"
 export interface CartItem extends Product {
     quantity: number;
 }
 
+// 👇 1. Definimos la estructura matemática del cupón
+export interface CouponData {
+    code: string;
+    discountPercentage: number;
+}
+
 interface CartStore {
-    items: CartItem[]; // Ahora guarda CartItems
+    items: CartItem[];
+    coupon: CouponData | null; // 👇 Nuevo estado para el cupón activo
     addItem: (data: Product) => void;
     removeItem: (id: string) => void;
     increaseQuantity: (id: string) => void;
     decreaseQuantity: (id: string) => void;
     removeAll: () => void;
+    applyCoupon: (coupon: CouponData) => void; // 👇 Nueva acción
+    removeCoupon: () => void; // 👇 Nueva acción
 }
 
 const useCart = create(
     persist<CartStore>(
         (set, get) => ({
             items: [],
+            coupon: null, // Arranca sin descuentos
 
             addItem: (data: Product) => {
                 const currentItems = get().items;
                 const existingItem = currentItems.find((item) => item.id === data.id);
         
                 if (existingItem) {
-                    // Si ya existe, actualizamos su cantidad sumándole 1
                     set({
                         items: currentItems.map((item) => 
                             item.id === data.id ? { ...item, quantity: item.quantity + 1 } : item
@@ -34,7 +42,6 @@ const useCart = create(
                     });
                     alert("Agregaste otra unidad al carrito 🛒");
                 } else {
-                    // Si no existe, lo agregamos por primera vez con cantidad 1
                     set({ items: [...currentItems, { ...data, quantity: 1 }] });
                     alert("Producto agregado al carrito 🛍️");
                 }
@@ -52,7 +59,6 @@ const useCart = create(
                 const currentItems = get().items;
                 const existingItem = currentItems.find((item) => item.id === id);
 
-                // Si hay más de 1, restamos 1. Si es 1, no hace absolutamente nada.
                 if (existingItem && existingItem.quantity > 1) {
                     set({
                         items: currentItems.map((item) => 
@@ -66,7 +72,12 @@ const useCart = create(
                 set({ items: [...get().items.filter((item) => item.id !== id)] });
             },
 
-            removeAll: () => set({ items: [] }),
+            // 👇 Al vaciar el carrito (por ejemplo en el success), limpiamos el cupón también
+            removeAll: () => set({ items: [], coupon: null }),
+
+            // 👇 Controladores del cupón
+            applyCoupon: (coupon: CouponData) => set({ coupon }),
+            removeCoupon: () => set({ coupon: null }),
         }),
         {
             name: 'cart-storage', 
