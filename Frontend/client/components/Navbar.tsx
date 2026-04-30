@@ -90,7 +90,13 @@ export default function Navbar() {
                     <Link href="/" className="flex items-center gap-2 shrink-0">
                         <p className="font-serif font-bold text-2xl tracking-tight uppercase">Lumière</p>
                     </Link>
-
+                    <div className="hidden md:flex items-center ml-8">
+                        <div className="hidden md:flex items-center ml-8">
+                            <Link href="/shop" className="text-sm font-medium text-gray-700 hover:text-black transition-colors uppercase tracking-widest">
+                                Tienda
+                            </Link>
+                        </div>
+                    </div>
                     {/* BARRA DE BÚSQUEDA EN VIVO */}
                     <div className="hidden md:flex flex-1 max-w-lg mx-8 relative group">
                         <form onSubmit={handleSearchSubmit} className="w-full relative">

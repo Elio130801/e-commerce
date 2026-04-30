@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+// 👇 1. Agregamos usePathname a las importaciones
+import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
 import { useState, useEffect } from "react";
-import { useDebounce } from "use-debounce"; // Necesitarás: npm install use-debounce
+import { useDebounce } from "use-debounce"; 
 
 export default function FilterSidebar({ categories }: { categories: any[] }) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname(); // 👇 2. Inicializamos el detector de rutas
 
     // Estados locales para los filtros
     const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -25,8 +27,9 @@ export default function FilterSidebar({ categories }: { categories: any[] }) {
         if (debouncedMin) params.set("minPrice", debouncedMin); else params.delete("minPrice");
         if (debouncedMax) params.set("maxPrice", debouncedMax); else params.delete("maxPrice");
 
-        router.push(`/?${params.toString()}`);
-    }, [debouncedSearch, debouncedMin, debouncedMax, router]);
+        // 👇 3. Reemplazamos el "/" rígido por el pathname dinámico
+        router.push(`${pathname}?${params.toString()}`);
+    }, [debouncedSearch, debouncedMin, debouncedMax, router, pathname]);
 
     return (
         <div className="w-full md:w-64 space-y-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit sticky top-20">
@@ -65,7 +68,8 @@ export default function FilterSidebar({ categories }: { categories: any[] }) {
             <button 
                 onClick={() => {
                     setSearch(""); setMinPrice(""); setMaxPrice("");
-                    router.push("/");
+                    // 👇 4. Limpiamos redirigiendo a la ruta actual, no a la raíz
+                    router.push(pathname);
                 }}
                 className="w-full text-xs text-gray-400 hover:text-black underline transition-colors"
             >
